@@ -28,7 +28,7 @@ process gangstr {
 	"""	
   	GangSTR \
   	--bam aln.bam \
-  	--ref-fasta genome.fa \
+  	--ref genome.fa \
   	--regions regions.bed \
   	--out output
 	"""
