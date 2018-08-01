@@ -19,7 +19,7 @@ process gangstr {
 	file('genome.fa') from genome_file
 	file('genome.fa.fai') from genome_index
 	file('ref') from ref_dir
-  file('regions.bed') from regions_file
+  	file('regions.bed') from regions_file
 
 	output:
 	file('output.*') into results
