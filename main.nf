@@ -26,11 +26,11 @@ process gangstr {
 	
 	script:
 	"""	
-  GangSTR \
-  --bam aln.bam \
-  --ref-fasta genome.fa \
-  --regions regions.bed \
-  --out output
+  	GangSTR \
+  	--bam aln.bam \
+  	--ref-fasta genome.fa \
+  	--regions regions.bed \
+  	--out output
 	"""
 }
 
