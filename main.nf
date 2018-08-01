@@ -7,7 +7,7 @@ genome_file = file(params.genome)
 genome_index = file(params.genome+".fai")
 bam_file = file(params.bam)
 bai_file = file(params.bam+".bai")
-ref_dir = file(params.repeats)
+ref_dir = file(params.ref)
 regions_file = file(params.regions)
 
 process gangstr {
