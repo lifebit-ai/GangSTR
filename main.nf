@@ -30,7 +30,7 @@ process gangstr {
   --bam aln.bam \
   --ref-fasta genome.fa \
   --regions regions.bed \
-  --out output \
+  --out output
 	"""
 }
 
