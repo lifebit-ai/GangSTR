@@ -2,6 +2,7 @@ params.genome = "s3://repeat-expansion/Reference/hs37d5.fa"
 params.bam = "s3://repeat-expansion/Bams/HG00457.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam"
 params.ref= "s3://repeat-expansion/ExpansionHunter/repeat-specs/grch37"
 params.regions = "s3://repeat-expansion/GangSTR/hs37_ver8.bed"
+params.nonuniform = false
 
 genome_file = file(params.genome)
 genome_index = file(params.genome+".fai")
@@ -9,6 +10,8 @@ bam_file = file(params.bam)
 bai_file = file(params.bam+".bai")
 ref_dir = file(params.ref)
 regions_file = file(params.regions)
+if(params.nonuniform) {extraflags = '--nonuniform'}
+
 
 process gangstr {
 	publishDir 'results'
@@ -30,7 +33,7 @@ process gangstr {
   	--bam aln.bam \
   	--ref genome.fa \
   	--regions regions.bed \
-  	--out output
+  	--out output ${extraflags}
 	"""
 }
 
