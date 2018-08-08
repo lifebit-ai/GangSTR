@@ -1,6 +1,6 @@
 # GangSTR
 
-NB: Many of the inputs/flags in the original GangSTR documentation will not work! Instead use the paramters used in the example below. If any paramters from the original GangSTR documentation (which is included below the example) are required they can be implemented by modifying the main.nf script. For any queries about implementing more paramters (eg --genomewide) you can email me at: phil@lifebit.ai.
+NB: **Many of the inputs/flags in the original GangSTR documentation will not work.** Instead use the paramters used in the example below. If any paramters from the original GangSTR documentation (which is included below the example) are required they can be implemented by modifying the main.nf script. For any queries about implementing more paramters (eg --genomewide) or anything else you can email me at: phil@lifebit.ai.
 
 ## Example command that can be run over Deploit
 Example/test command that can be run on [Deploit](https://deploit.lifebit.ai/) using publically available test data. The data can be imported from the AWS S3 bucket [s3://lifebit-featured-datasets/](https://s3.console.aws.amazon.com/s3/buckets/lifebit-featured-datasets/pipelines/RepeatExpansion/?region=eu-west-1&tab=overview) 
@@ -8,8 +8,7 @@ Example/test command that can be run on [Deploit](https://deploit.lifebit.ai/) u
 nextflow run lifebit-ai/GangSTR --genome RepeatExpansion/RepeatExpansion/Reference/hs37d5.fa
                                 --bam RepeatExpansion/RepeatExpansion/Bams/HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam
                                 --regions RepeatExpansion/RepeatExpansion/GangSTR/hs37_ver8.bed 
-                                --nonuniform 
-                                --ref RepeatExpansion/RepeatExpansion/ExpansionHunter/repeat-specs/grch37
+                                --nonuniform
 ```
 
 * Please ensure the index file (.bam.bai) is located within the same folder. For example, for the test data the index file HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam.bai is already located within RepeatExpansion/RepeatExpansion/Bams folder and so nothing more needs to be done.
