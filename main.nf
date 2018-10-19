@@ -64,9 +64,9 @@ process preprocess_bam{
 
 
 process gangstr {
-	publishDir 'results'
-
 	publishDir "${params.outdir}", mode: 'copy'
+
+	container = 'lifebitai/gangstr'
 
 	input:
 	set file(bam), file(bai) from completeChannel
