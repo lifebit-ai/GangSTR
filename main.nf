@@ -12,9 +12,11 @@ Channel
 		.ifEmpty { exit 1, "${params.genome} not found.\nPlease specify --genome option (--genome fastafile)"}
 		.into { fastaToFai; fastaToGangSTR }
 
-Channel
-		.fromPath(params.fai)
-		.ifEmpty { exit 1, "${params.fai} not found.\nMake sure your the file exists (--fai faifile) or remove the fai option for it be automatically generated"}
+if(params.fai){
+	Channel
+			.fromPath(params.fai)
+			.ifEmpty { exit 1, "${params.fai} not found.\nMake sure your the file exists (--fai faifile) or remove the fai option for it be automatically generated"}
+}
 
 bed = Channel
     .fromPath(params.bed)
