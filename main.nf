@@ -7,9 +7,14 @@ bam = Channel
 		.fromPath(params.bam)
 		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
 
-fasta = Channel
+Channel
 		.fromPath(params.genome)
 		.ifEmpty { exit 1, "${params.genome} not found.\nPlease specify --genome option (--genome fastafile)"}
+		.into { fastaToFai; fastaToGangSTR }
+
+Channel
+		.fromPath(params.fai)
+		.ifEmpty { exit 1, "${params.fai} not found.\nMake sure your the file exists (--fai faifile) or remove the fai option for it be automatically generated"}
 
 bed = Channel
     .fromPath(params.bed)
@@ -62,6 +67,24 @@ process preprocess_bam{
   """
 }
 
+if(!params.fai) {
+  process preprocess_genome {
+
+			tag "${fasta}"
+			container 'lifebitai/preprocessingvctools'
+
+      input:
+      file fasta from fastaToFai
+
+      output:
+      file("${fasta}.fai") into fai
+
+      script:
+      """
+      samtools faidx $fasta
+      """
+  }
+}
 
 process gangstr {
 	publishDir "${params.outdir}", mode: 'copy'
@@ -70,7 +93,8 @@ process gangstr {
 
 	input:
 	set file(bam), file(bai) from completeChannel
-	file fasta from fasta
+	file fasta from fastaToGangSTR
+	file fai from fai
 	file bed from bed
 
 	output:
