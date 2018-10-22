@@ -1,38 +1,113 @@
-params.genome = "s3://repeat-expansion/Reference/hs37d5.fa"
-params.bam = "s3://repeat-expansion/Bams/HG00457.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam"
-params.ref= "s3://repeat-expansion/ExpansionHunter/repeat-specs/grch37"
-params.regions = "s3://repeat-expansion/GangSTR/hs37_ver8.bed"
-params.nonuniform = false
+#!/usr/bin/env nextflow
 
-genome_file = file(params.genome)
-genome_index = file(params.genome+".fai")
-bam_file = file(params.bam)
-bai_file = file(params.bam+".bai")
-ref_dir = file(params.ref)
-regions_file = file(params.regions)
-if(params.nonuniform) {extraflags = '--nonuniform'}
+/*
+ * SET UP CONFIGURATION VARIABLES
+ */
+bam = Channel
+		.fromPath(params.bam)
+		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
 
+Channel
+		.fromPath(params.genome)
+		.ifEmpty { exit 1, "${params.genome} not found.\nPlease specify --genome option (--genome fastafile)"}
+		.into { fastaToFai; fastaToGangSTR }
+
+if(params.fai){
+	Channel
+			.fromPath(params.fai)
+			.ifEmpty { exit 1, "${params.fai} not found.\nMake sure your the file exists (--fai faifile) or remove the fai option for it be automatically generated"}
+}
+
+bed = Channel
+    .fromPath(params.bed)
+    .ifEmpty { exit 1, "${params.bed} not found.\nPlease specify --bed option (--bed bedfile)"}
+
+if(params.nonuniform) {
+	extraflags = '--nonuniform'
+} else {
+	extraflags = ""
+}
+
+// Header log info
+log.info """=======================================================
+		GangSTR
+======================================================="""
+def summary = [:]
+summary['Pipeline Name']    = 'GangSTR'
+summary['Bam file']         = params.bam
+summary['Bed file']         = params.bed
+summary['Reference genome'] = params.genome
+summary['Output dir']       = params.outdir
+summary['Working dir']      = workflow.workDir
+log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
+log.info "========================================="
+
+
+process preprocess_bam{
+
+  tag "${bam}"
+	container 'lifebitai/samtools'
+
+  input:
+  file bam from bam
+
+  output:
+  set file("ready/${bam}"), file("ready/${bam}.bai") into completeChannel
+
+  script:
+  """
+  mkdir ready
+  [[ `samtools view -H ${bam} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { java -jar /picard.jar AddOrReplaceReadGroups \
+  I=${bam} \
+  O=ready/${bam} \
+  RGID=${params.rgid} \
+  RGLB=${params.rglb} \
+  RGPL=${params.rgpl} \
+  RGPU=${params.rgpu} \
+  RGSM=${params.rgsm};}
+  cd ready ;samtools index ${bam};
+  """
+}
+
+if(!params.fai) {
+  process preprocess_genome {
+
+			tag "${fasta}"
+			container 'lifebitai/preprocessingvctools'
+
+      input:
+      file fasta from fastaToFai
+
+      output:
+      file("${fasta}.fai") into fai
+
+      script:
+      """
+      samtools faidx $fasta
+      """
+  }
+}
 
 process gangstr {
-	publishDir 'results'
+	publishDir "${params.outdir}", mode: 'copy'
+
+	container = 'lifebitai/gangstr'
 
 	input:
-	file('aln.bam') from bam_file
-	file('aln.bam.bai') from bai_file
-	file('genome.fa') from genome_file
-	file('genome.fa.fai') from genome_index
-	file('ref') from ref_dir
-  	file('regions.bed') from regions_file
+	set file(bam), file(bai) from completeChannel
+	file fasta from fastaToGangSTR
+	file fai from fai
+	file bed from bed
 
 	output:
-	file('output.*') into results
-	
+	file('output*') into results
+
 	script:
-	"""	
+	"""
   	GangSTR \
-  	--bam aln.bam \
-  	--ref genome.fa \
-  	--regions regions.bed \
+  	--bam ${bam} \
+  	--ref ${fasta} \
+  	--regions ${bed} \
   	--out output ${extraflags}
 	"""
 }
@@ -40,4 +115,3 @@ process gangstr {
 workflow.onComplete {
 	println ( workflow.success ? "\nGangSTR is done!" : "Oops .. something went wrong" )
 }
-    
