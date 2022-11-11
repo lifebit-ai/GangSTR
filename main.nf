@@ -56,6 +56,7 @@ process preprocess_bam{
 
   script:
   """
+	echo '$task.container'
   mkdir ready
   [[ `samtools view -H ${bam} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { gatk  AddOrReplaceReadGroups \
 	-I ${bam[0]} -O ready/${bam[0]} --RGID ${params.rgid} --RGLB ${params.rglb} --RGPL ${params.rgpl} --RGPU ${params.rgpu} --RGSM ${params.rgsm};}
