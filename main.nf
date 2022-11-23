@@ -84,7 +84,7 @@ if(!params.fai) {
 }
 
 process gangstr {
-	publishDir "${params.outdir}", mode: 'copy'
+	publishDir "${params.outdir}", mode: 'move'
 
 	container = 'lifebitai/gangstr'
 
